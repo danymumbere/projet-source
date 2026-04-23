@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source - détails </title>
+    <link rel="SHORTCUT ICON" href="images/source_logo2.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="Colonne_principale">
+    <button class="bouton" onclick="window.location.href='page_accueil.html'">⬅ Retour</button>
+    <button class="bouton" onclick="jour_et_nuit()"> ☀ / 🌙 </button>
+
+    <div id="details-container" style="padding:20px;">
+        <div id="uploader-info" style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-direction: column;">
+            <div id="user-badge" class="user-badge" style="width: 60px; height: 60px; font-size: 2rem; cursor: pointer;">?</div>
+            <p id="uploader-name" style="font-size: 0.9rem; color: #888; margin-top: 5px;"></p>
+        </div>
+
+        <div class="forcer_centre_img"><img id="setup-icon" src="" style="width:100px; border-radius:15px; display:inline"></div>
+        <h1 id="setup-name">Chargement...</h1>
+        <p id="setup-desc" style="white-space: pre-wrap;"></p>
+        
+        <a id="download-link" href="">
+            <button class="bouton" style="background:#28a745; color: white;">⬇ Télécharger le .exe</button>
+        </a>
+
+        <h3>Captures d'écran / Usage :</h3>
+        <div id="usage-gallery" style="display:flex; gap:10px; flex-wrap:wrap; justify-content: center;"></div>
+    </div>
+    </div>
+
+    <script>
+        async function loadDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            // --- Sécurité 1 : On vérifie si l'ID existe avant de lancer le fetch ---
+            if (!id || id === "undefined") {
+                document.getElementById('setup-name').textContent = "Erreur : ID introuvable";
+                alert("Oups ! L'identifiant du setup est manquant.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`/setup/${id}`);
+                if (!res.ok) throw new Error("Erreur lors de la récupération des données");
+                
+                const data = await res.json();
+
+                // 1. Remplissage des textes
+                document.getElementById('setup-name').textContent = data.nom;
+                document.getElementById('setup-desc').textContent = data.description || "Aucune description fournie.";
+                
+                // 2. Gestion de l'icône
+                if (data.icone) {
+                    const iconImg = document.getElementById('setup-icon');
+                    iconImg.src = `/uploads/${data.icone}`;
+                    iconImg.style.display = "block";
+                }
+
+                // 3. Lien de téléchargement (via la route de téléchargement pour compter)
+                document.getElementById('download-link').href = `/download/${data._id || data.id}`;
+
+                // 4. Badge de l'uploadeur (Le fameux bouton dynamique)
+                if (data.uploader) {
+                    const badge = document.getElementById('user-badge');
+                    badge.textContent = data.uploader.nom.charAt(0).toUpperCase();
+                    badge.onclick = () => window.location.href = `personal_setup.html?uid=${data.uploader._id || data.uploader.id}`;
+                    document.getElementById('uploader-name').textContent = `Publié par ${data.uploader.nom}`;
+                }
+
+                // 5. Galerie d'images
+                const gallery = document.getElementById('usage-gallery');
+                gallery.innerHTML = (data.imagesUsage || []).map(img => 
+                    `<img src="/uploads/${img}" style="width:250px; border-radius:8px; border:1px solid #ddd; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);">`
+                ).join('');
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('setup-name').textContent = "Erreur de chargement";
+            }
+        }
+
+        window.onload = loadDetails;
+    </script>
+    <script src="action.js"></script>
+</body>
+</html>

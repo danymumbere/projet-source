@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source</title>
+    <link rel="SHORTCUT ICON" href="images/source_logo2.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="action.js"></script>
+</head>
+<body>
+    <button class="bouton" onclick="jour_et_nuit()"> ☀ / 🌙 </button><br>
+    <h1>Créer un compte</h1><br>
+    <form method="Post" action="/inscription">
+        <table>
+            <thead>
+                <th></th>
+                <th></th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><label for="email"> Email:</label></td><td><input type="text" name="email" required="on"></td>
+                </tr>
+                <tr>
+                    <td><label for="mot_de_passe"> Mot de passe du site:</label></td><td><input type="password" name="mot_de_passe" required="on"></td>
+                </tr>
+                <tr>
+                    <td><label for="nom"> Votre nom:</label></td><td><input type="text" name="nom" required="on"></td>
+                </tr>
+            </tbody>
+        </table>
+        <p><b>Vous êtes:</b></p>
+        <p><input type="radio" name="identite" value="autre">Etudiant <input type="radio" name="identite" value="autre">Autre</p><br>
+        <table>
+            <thead>
+                <th></th>
+                <th></th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><label for="universite"> Université:</label></td><td><input type="text" name="universite" required="on"></td>
+                </tr>
+                <tr>
+                    <td><label for="niveau"> Niveau:</label></td><td><select name="niveau" selected="niveau_1">
+                                                                    <option value="niveau_1">1<sup>ère</sup> Année</option>
+                                                                    <option value="niveau_2">2<sup>ème</sup> Année</option>
+                                                                    <option value="niveau_3">3<sup>ème</sup> Année</option>
+                                                                    <option value="niveau_4">4<sup>ème</sup> Année</option>
+                                                                    <option value="niveau_5">5<sup>ème</sup> Année</option>
+                                                                    </select>
+                                                                 </td>
+                </tr>
+            </tbody>
+        </table><br> 
+        <input type="submit" value="S'inscrire" name="s_inscrire" class="bouton">
+
+    </form>
+    
+</body>
+</html>

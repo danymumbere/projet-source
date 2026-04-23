@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source - Réinitialisation</title>
+    <link rel="SHORTCUT ICON" href="images/source_logo2.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="action.js"></script>
+</head>
+<body>
+    <div class="Colonne_principale">
+        <h1>Réinitialisation du mot de passe</h1>
+        <p style="color: gray;">Consultez votre boîte mail pour obtenir le code.</p>
+        
+        <form method="POST" action="/reset-password">
+            <label for="code">Code secret reçu :</label><br>
+            <input type="text" name="code" placeholder="Ex: 1234" required><br><br>
+
+            <label for="nouveau_pass">Nouveau mot de passe :</label><br>
+            <input type="password" name="nouveau_pass" required><br><br>
+
+            <input type="submit" value="Appliquer le nouveau mot de passe" class="bouton">
+        </form>
+    </div>
+</body>
+</html>

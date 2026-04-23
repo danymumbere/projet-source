@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source - Compléter le setup </title>
+    <link rel="SHORTCUT ICON" href="images/source_logo2.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="Colonne_principale">
+    <button class="bouton" onclick="jour_et_nuit()"> ☀ / 🌙 </button>
+    <h2>Compléter les informations</h2>
+    
+    <form id="form-details">
+        <label>Icône de l'application :</label>
+        <input type="file" name="image-icone" accept="image/*" required><br>
+
+        <label>Images d'usage (plusieurs possibles) :</label>
+        <input type="file" name="images-usage" accept="image/*" multiple><br>
+
+        <textarea name="description" placeholder="Ajoutez la description ici" required></textarea><br>
+
+        <label><input type="radio" name="cible" value="Etablissement" checked> Demandé par l'établissement</label>
+        <label><input type="radio" name="cible" value="Personnel"> Recommandé par moi</label><br>
+
+        <button type="submit" class="bouton">Enregistrer et Publier</button>
+    </form>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+    const setupId = urlParams.get('id');
+
+    console.log("ID détecté sur la page :", setupId);
+
+    document.getElementById('form-details').onsubmit = async (e) => {
+        e.preventDefault();
+        console.log("Tentative d'envoi du formulaire...");
+
+        const formData = new FormData(e.target);
+
+        try {
+            const res = await fetch(`/update-setup/${setupId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                const texte = await res.text();
+                console.log("Réponse du serveur :", texte);
+                alert("Succès : " + texte);
+                window.location.href = 'page_accueil.html';
+            } else {
+                // Si le serveur répond une erreur (404, 500, etc.)
+                const erreur = await res.text();
+                console.error("Erreur serveur :", erreur);
+                alert("Le serveur a refusé l'enregistrement : " + erreur);
+            }
+        } catch (err) {
+            // Si la connexion au serveur est coupée
+            console.error("Erreur de connexion :", err);
+            alert("Impossible de contacter le serveur.");
+        }
+    };
+    </script>
+    <script src="action.js"></script>
+</body>
+</html>

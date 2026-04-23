@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source - Profil Utilisateur</title>
+    <link rel="SHORTCUT ICON" href="images/source_logo2.png">
+    <meta name= "description" content="setups uploadés par uploadeur">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="Colonne_principale">
+    <button class="bouton" onclick="window.location.href='page_accueil.html'">⬅ Accueil</button>
+    <button class="bouton" onclick="jour_et_nuit()"> ☀ / 🌙 </button>
+
+    <header style="text-align: center; padding: 40px 20px;">
+        <div id="user-initial" class="user-badge" style="width: 80px; height: 80px; font-size: 2.5rem; margin: 0 auto;">?</div>
+        <h1 id="profile-title">Chargement du profil...</h1>
+        <p id="setup-count" style="color: gray;"></p>
+    </header>
+
+    <main>
+        <div id="user-grid" class="exe-grid">
+            </div>
+    </main>
+</div>
+
+    <script>
+        async function loadUserProfil() {
+            const params = new URLSearchParams(window.location.search);
+            const uid = params.get('uid');
+
+            if (!uid) {
+                document.getElementById('profile-title').textContent = "Utilisateur introuvable";
+                return;
+            }
+
+            try {
+                const res = await fetch(`/user-setups/${uid}`);
+                const data = await res.json();
+
+                // 1. Mise à jour de l'en-tête
+                document.getElementById('profile-title').textContent = `Setups de ${data.createur}`;
+                document.getElementById('user-initial').textContent = data.createur.charAt(0).toUpperCase();
+                document.getElementById('setup-count').textContent = `${data.setups.length} fichier(s) publié(s)`;
+
+                // 2. Affichage de la grille
+                const grid = document.getElementById('user-grid');
+                if (data.setups.length === 0) {
+                    grid.innerHTML = "<p>Cet utilisateur n'a pas encore publié de setup.</p>";
+                    return;
+                }
+
+                grid.innerHTML = data.setups.map(exe => `
+                    <div class="exe-card" onclick="window.location.href='description_setup.html?id=${exe._id}'" style="cursor:pointer">
+                        <img src="/uploads/${exe.icone || ''}" style="width:50px; height:50px; margin-bottom:10px;" alt="📦">
+                        <div class="title">${exe.nom}</div>
+                        <div class="stats">📥 ${exe.downloads} téléchargements</div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('profile-title').textContent = "Erreur de chargement";
+            }
+        }
+
+        window.onload = loadUserProfil;
+    </script>
+    <script src="action.js"></script>
+</body>
+</html>
