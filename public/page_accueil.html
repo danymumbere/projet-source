@@ -4,26 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Source</title>
-    <link rel="SHORTCUT ICON" href="images/source_logo2.png">
-    <meta name= "description" content="Setups/ installateurs pour tous">
+    <link rel="SHORTCUT ICON" href="/images/source_logo2.png">
+    <meta name="description" content="Setups/ installateurs pour tous">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <div class="Colonne_principale">
-    <button class="bouton" onclick="jour_et_nuit()"> ☀ / 🌙 </button>
-    <button class="bouton" onclick="window.location.href='/deconnexion'" style="background-color: #dc3545; color: white;">
-    🚪 Déconnexion
-    </button><br>
-<input type="text" id="recherche" placeholder="🔎 Rechercher un setup ">
+        <button class="bouton" onclick="jour_et_nuit()"> ☀ / 🌙 </button>
+        <button class="bouton" onclick="window.location.href='/deconnexion'" style="background-color: #dc3545; color: white;">
+            🚪 Déconnexion
+        </button>
+        <br><br>
 
-<div id="drop-zone" class="drop-zone">
-    Déposez votre fichier .exe ici pour l'ajouter
-</div>
-<div class="exe-card"><a href="https://resources-aime.netlify.app/" target="blank" style="background-color: khaki;"> Découvrez une autre de nos oeuvres </a></div>
+        <input type="text" id="recherche" placeholder="🔎 Rechercher un setup ">
 
-<div id="exe-grid" class="grid-container">
+        <div style="margin: 15px 0;">
+            <button class="bouton" id="browse-btn" type="button">📁 Parcourir</button>
+            <input type="file" id="file-input" accept=".exe" style="display:none;">
+        </div>
+
+        <div id="drop-zone" class="drop-zone">
+            Déposez votre fichier .exe ici pour l'ajouter
+            <br><br>
+            <small>ou cliquez sur “Parcourir” pour choisir un fichier</small>
+        </div>
+
+        <p id="upload-status" style="color: gray; min-height: 20px;"></p>
+
+        <div class="exe-card">
+            <a href="https://resources-aime.netlify.app/" target="_blank" style="background-color: khaki;">
+                Découvrez une autre de nos oeuvres
+            </a>
+        </div>
+
+        <div id="exe-grid" class="grid-container"></div>
     </div>
-    </div>
-<script src="/action.js">  javascript </script>    
+
+    <script>
+        async function uploadExeFile(file) {
+            if (!file) return;
+            if (!file.name.toLowerCase().endsWith('.exe')) {
+                alert("Seuls les fichiers .exe sont acceptés !");
+                return;
+            }
+
+            const status = document.getElementById('upload-status');
+            const browseBtn = document.getElementById('browse-btn');
+            const dropZone = document.getElementById('drop-zone');
+
+            try {
+                browseBtn.disabled = true;
+                dropZone.style.pointerEvents = 'none';
+                status.textContent = "Envoi du fichier en cours...";
+
+                const formData = new FormData();
+                formData.append('logiciel', file);
+
+                const res = await fetch('/upload-exe', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    status.textContent = "Fichier reçu. Redirection...";
+                    alert("Fichier reçu ! Configurons les détails...");
+                    window.location.href = `ajouter_setup.html?id=${data.id}`;
+                } else {
+                    const errorText = await res.text();
+                    status.textContent = "";
+                    alert("Erreur : " + errorText);
+                }
+            } catch (err) {
+                console.error(err);
+                status.textContent = "";
+                alert("Impossible de contacter le serveur.");
+            } finally {
+                browseBtn.disabled = false;
+                dropZone.style.pointerEvents = 'auto';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const browseBtn = document.getElementById('browse-btn');
+            const fileInput = document.getElementById('file-input');
+
+            browseBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                uploadExeFile(file);
+                fileInput.value = '';
+            });
+        });
+    </script>
+
+    <script src="/action.js"></script>
 </body>
 </html>
