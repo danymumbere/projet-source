@@ -8,6 +8,12 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
+
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 const multer = require('multer');
 const session = require('express-session'); // <-- DÉPLACÉ ICI !
 const User = require('./models/user');
@@ -51,7 +57,9 @@ mongoose.connect(process.env.MONGO_URI)
 // --- CONFIGURATION MULTER ---
 // Upload pour les EXE (local)
 const storageExe = multer.diskStorage({
-    destination: 'uploads/',
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
     }
