@@ -43,7 +43,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: true, // mettra true plus tard si HTTPS
+        secure: false, // mettra true plus tard si HTTPS
         httpOnly: true,
         maxAge: 3600000
     }
