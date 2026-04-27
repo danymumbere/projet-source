@@ -16,7 +16,8 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 
 const app = express();
-
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 // --- CONFIGURATION / MIDDLEWARES ---
 // Autorise ton site Netlify à communiquer avec ce serveur
 //app.use(cors({
@@ -36,7 +37,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // mettra true plus tard si HTTPS
+        secure: true, // mettra true plus tard si HTTPS
         httpOnly: true,
         maxAge: 3600000
     }
@@ -48,13 +49,14 @@ mongoose.connect(process.env.MONGO_URI)
 .catch(err => console.error("❌ Erreur Mongo :", err.message));
 
 // --- CONFIGURATION MULTER ---
-const storage = multer.diskStorage({
+// Upload pour les EXE (local)
+const storageExe = multer.diskStorage({
     destination: 'uploads/',
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
     }
 });
-const upload = multer({ storage: storage });
+const uploadExe = multer({ storage: storageExe });
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -64,11 +66,28 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storageImages = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'source_app',
+        allowed_formats: ['jpg', 'png', 'jpeg', 'webp']
+    }
+});
+
+// Upload pour les IMAGES (Cloudinary)
+const uploadImages = multer({ storage: storageImages });
+
 // --- ROUTES ---
 
 
 // 1. L'étape 1 : On reçoit le .exe et on renvoie son ID
-app.post('/upload-exe', upload.single('logiciel'), async (req, res) => {
+app.post('/upload-exe', uploadExe.single('logiciel'), async (req, res) => {
     try {
         // Sécurité : On vérifie si l'utilisateur est connecté
         if (!req.session.userId) {
@@ -91,7 +110,7 @@ app.post('/upload-exe', upload.single('logiciel'), async (req, res) => {
 });
 
 // 2. L'étape 2 : Le bouton "Enregistrer et Publier" appelle cette route
-app.post('/update-setup/:id', upload.fields([
+app.post('/update-setup/:id', uploadImages.fields([
     { name: 'image-icone', maxCount: 1 },
     { name: 'images-usage', maxCount: 5 }
 ]), async (req, res) => {
@@ -100,8 +119,13 @@ app.post('/update-setup/:id', upload.fields([
         const updates = {
             description: req.body.description,
             cible: req.body.cible,
-            icone: req.files['image-icone'] ? req.files['image-icone'][0].filename : '',
-            imagesUsage: req.files['images-usage'] ? req.files['images-usage'].map(f => f.filename) : []
+            icone: req.files && req.files['image-icone']
+                ? req.files['image-icone'][0].path
+                : '',
+
+            imagesUsage: req.files && req.files['images-usage']
+                ? req.files['images-usage'].map(f => f.path)
+                : []
         };
         await Executable.findByIdAndUpdate(id, updates);
         res.send("Détails enregistrés !");

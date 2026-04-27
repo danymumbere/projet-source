@@ -53,7 +53,7 @@
 
                 grid.innerHTML = data.setups.map(exe => `
                     <div class="exe-card" onclick="window.location.href='description_setup.html?id=${exe._id}'" style="cursor:pointer">
-                        <img src="/uploads/${exe.icone || ''}" style="width:50px; height:50px; margin-bottom:10px;" alt="📦">
+                        <img src="${exe.icone || ''}" style="width:50px; height:50px; margin-bottom:10px;" alt="📦">
                         <div class="title">${exe.nom}</div>
                         <div class="stats">📥 ${exe.downloads} téléchargements</div>
                     </div>
