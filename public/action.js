@@ -62,9 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Gestion du dépôt
     dropZone.ondrop = async (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('hover');
-        
+    e.preventDefault();
+    dropZone.classList.remove('hover');
+
+    try {
         const file = e.dataTransfer.files[0];
         if (!file) return;
         if (!file.name.endsWith('.exe')) return alert("Seuls les fichiers .exe sont acceptés !");
@@ -72,18 +73,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('logiciel', file);
 
-        const res = await fetch(`/upload-exe`, { method: 'POST', body: formData, credentials: 'include' });
-        if (res.ok) {
-            const data = await res.json();
-            console.log("Contenu de data reçu :", data);
-            alert("Fichier reçu ! Configurons les détails...");
-            window.location.href = `ajouter_setup.html?id=${data.id}`; // Redirection magique
-        }else{
-            // On récupère le texte de l'erreur envoyé par le serveur
-            const errorText = await res.text(); 
+        const res = await fetch('/upload-exe', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
             alert("Erreur : " + errorText);
-        };
+            return;
+        }
+
+        const data = await res.json();
+        alert("Fichier reçu ! Configurons les détails...");
+        window.location.href = `ajouter_setup.html?id=${data.id}`;
+    } catch (err) {
+        console.error("Erreur réseau upload :", err);
+        alert("Problème réseau pendant l’upload.");
     }
+};
 
     // --- Système de Recherche et Affichage ---
     let tousLesSetups = []; // On crée une boîte pour stocker TOUS les setups en mémoire
