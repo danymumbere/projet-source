@@ -13,7 +13,7 @@ async function chargerSetups() {
             <div class="user-badge" onclick="window.location.href='personal_setup.html?uid=${setup.uploader.id}'">
                 ${initiale}
             </div>
-            <img src="/uploads/${setup.icone}" class="icon" alt="icon">
+            <img src="${setup.icone}" class="icon" alt="icon">
             <div class="title">${setup.nom}</div>
             <div class="stats">📥 ${setup.downloads} téléchargements</div>
             <button class="bouton" onclick="telecharger('${setup.id}')">Télécharger</button>
@@ -62,10 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Gestion du dépôt
     dropZone.ondrop = async (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('hover');
-
-    try {
+        e.preventDefault();
+        dropZone.classList.remove('hover');
+        
         const file = e.dataTransfer.files[0];
         if (!file) return;
         if (!file.name.endsWith('.exe')) return alert("Seuls les fichiers .exe sont acceptés !");
@@ -73,26 +72,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('logiciel', file);
 
-        const res = await fetch('/upload-exe', {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text();
+        const res = await fetch(`/upload-exe`, { method: 'POST', body: formData, credentials: 'include' });
+        if (res.ok) {
+            const data = await res.json();
+            console.log("Contenu de data reçu :", data);
+            alert("Fichier reçu ! Configurons les détails...");
+            window.location.href = `ajouter_setup.html?id=${data.id}`; // Redirection magique
+        }else{
+            // On récupère le texte de l'erreur envoyé par le serveur
+            const errorText = await res.text(); 
             alert("Erreur : " + errorText);
-            return;
-        }
-
-        const data = await res.json();
-        alert("Fichier reçu ! Configurons les détails...");
-        window.location.href = `ajouter_setup.html?id=${data.id}`;
-    } catch (err) {
-        console.error("Erreur réseau upload :", err);
-        alert("Problème réseau pendant l’upload.");
+        };
     }
-};
 
     // --- Système de Recherche et Affichage ---
     let tousLesSetups = []; // On crée une boîte pour stocker TOUS les setups en mémoire
@@ -120,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span style="font-size: 0.8rem; color: #666; font-weight: bold;">${nomUploader}</span>
                 </div>
 
-                <img src="${exe.icone || ''}" style="width:50px; height:50px; margin-bottom:10px;" alt="📦">
+                <img src="/uploads/${exe.icone || ''}" style="width:50px; height:50px; margin-bottom:10px;" alt="📦">
                 <div class="title" style="font-weight: bold;">${exe.nom}</div>
                 <div style="font-size:10px; color:#888;">${(exe.taille / 1024 / 1024).toFixed(2)} MB</div>
             </div>
