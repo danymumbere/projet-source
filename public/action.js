@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span style="font-size: 0.8rem; color: #666; font-weight: bold;">${nomUploader}</span>
                 </div>
 
-                <img src="/uploads/${exe.icone || ''}" style="width:50px; height:50px; margin-bottom:10px;" alt="📦">
+                <img src="${exe.icone || ''}" style="width:50px; height:50px; margin-bottom:10px;" alt="📦">
                 <div class="title" style="font-weight: bold;">${exe.nom}</div>
                 <div style="font-size:10px; color:#888;">${(exe.taille / 1024 / 1024).toFixed(2)} MB</div>
             </div>
